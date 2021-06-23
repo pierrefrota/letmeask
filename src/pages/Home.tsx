@@ -1,4 +1,6 @@
+import { FormEvent, useState } from "react";
 import { useHistory } from "react-router-dom";
+import toast, { Toaster } from "react-hot-toast";
 
 import { Button } from "../components/Button";
 
@@ -7,9 +9,13 @@ import logoImg from "../assets/images/logo.svg";
 import googleIon from "../assets/images/google-icon.svg";
 
 import "../styles/auth.scss";
+
 import { useAuth } from "../hooks/useAuth";
+import { database } from "../services/firebase";
 
 export function Home() {
+  const [roomCode, setRoomCode] = useState("");
+
   const { user, signInWithGoogle } = useAuth();
   const history = useHistory();
 
@@ -19,8 +25,27 @@ export function Home() {
     }
     history.push("/rooms/new");
   }
+
+  async function handleJoinRoom(event: FormEvent) {
+    event.preventDefault();
+
+    if (roomCode.trim() === "") {
+      return;
+    }
+
+    const roomRef = await database.ref(`rooms/${roomCode}`).get();
+
+    if (!roomRef.exists()) {
+      toast.error("Sala não existe.");
+      return;
+    }
+
+    history.push(`/rooms/${roomCode}`);
+  }
+
   return (
     <div id="page-auth">
+      <Toaster />
       <aside>
         <img
           src={illustratioSvg}
@@ -40,8 +65,13 @@ export function Home() {
           </button>
           <div className="separator">ou entre em uma sala</div>
 
-          <form action="">
-            <input type="text" placeholder="Digite o código da sala" />
+          <form onSubmit={handleJoinRoom}>
+            <input
+              onChange={(event) => setRoomCode(event.target.value)}
+              value={roomCode}
+              type="text"
+              placeholder="Digite o código da sala"
+            />
             <Button type="submit">Entrar na sala</Button>
           </form>
         </div>
