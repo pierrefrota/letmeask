@@ -25,6 +25,8 @@ export function Room() {
 
   const { title, questions } = useRoom(roomId);
 
+  console.log(user);
+
   async function handleSendQuestion(event: FormEvent) {
     event.preventDefault();
 
@@ -39,7 +41,7 @@ export function Room() {
     const question = {
       content: newQuestion,
       author: {
-        user: user?.name,
+        name: user?.name,
         avatar: user?.avatar,
       },
 
